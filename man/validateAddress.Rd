@@ -2,10 +2,22 @@
 % Please edit documentation in R/validate_address.R
 \name{validateAddress}
 \alias{validateAddress}
-\title{Validate an Address}
+\title{Validate a parsed address according to USPS standards}
 \usage{
 validateAddress(userid, address)
 }
+\arguments{
+\item{userid}{The userid given to you by USPS, see the Details for more}
+
+\item{address}{A data.frame or \code{\link[data.table]{data.table}} with the
+columns: `Address1`, `Address2`, `City`, `State`, `Zip5` and `Zip4`. You
+must supply either the `City` and `State` or the `Zip5` (with or without `Zip4`)
+for each address.}
+}
 \description{
-Validate an Address
+Validate a parsed address according to USPS standards
+}
+\details{
+If you do not have a `userid` you should register at \url{https://www.usps.com/business/web-tools-apis}
+    before trying to use this function.
 }

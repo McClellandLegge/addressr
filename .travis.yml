@@ -1,0 +1,20 @@
+language: R
+sudo: true
+warnings_are_errors: false
+cache: packages
+
+before_install:
+  - sudo apt-get install libv8-dev
+
+r_github_packages:
+  - jimhester/covr
+  - hadley/testthat
+  - ropensci/geojsonlint
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
+notifications:
+  email:
+  on_success: change
+  on_failure: change
