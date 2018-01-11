@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 data-raw/
 data-local/
+CONTRIBUTING.md
+.travis.yml

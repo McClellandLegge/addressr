@@ -26,6 +26,21 @@
 #' @export
 cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 10L) {
 
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("`data.table`` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("ggmap", quietly = TRUE)) {
+    stop("`ggmap` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("methods", quietly = TRUE)) {
+    stop("`methods` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   data_dt <- data.table::as.data.table(data)
 
   if (!address_column %in% names(data_dt)) {
@@ -105,7 +120,7 @@ cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 1
   # merge the geocoding back in:
   orig_id_class <- class(data_dt[['id']])
   if (orig_id_class != "character") {
-    validated_dt[['id']] <- as(validated_dt[['id']], orig_id_class)
+    validated_dt[['id']] <- methods::as(validated_dt[['id']], orig_id_class)
   }
 
   # change the names back to the original ones before re-merging to prevent
@@ -127,9 +142,31 @@ cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 1
 #'
 #' @details If you do not have a `userid` you should register at \url{https://www.usps.com/business/web-tools-apis}
 #'     before trying to use this function.
+#'
+#' @seealso \code{\link{cleanAddress}}
 #' @export
 #' @import data.table
 validateAddress <- function(userid, address) {
+
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("`data.table`` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("RCurl", quietly = TRUE)) {
+    stop("`RCurl` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("xml2", quietly = TRUE)) {
+    stop("`xml2` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("utils", quietly = TRUE)) {
+    stop("`utils` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
 
   atags <- addressr:::available_tags
   if (!any(atags %in% names(address))) {
@@ -181,6 +218,11 @@ validateAddress <- function(userid, address) {
 #' @export
 extractResponseItems <- function(response) {
 
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("`data.table` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # convert each item to a data table retaining the ID attribute
   dt_list <- lapply(response, function(resp_item) {
     # extract the id attribute for rejoining with the indexed set
@@ -226,6 +268,12 @@ extractResponseItems <- function(response) {
 
 #' @export
 addChildren <- function(node, avps) {
+
+  if (!requireNamespace("xml2", quietly = TRUE)) {
+    stop("`xml2` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # for each tag and value, add a child node to the one passed
   # FIXME: add option to exclude writing blank tags
   for (name in names(avps)) {
@@ -236,6 +284,12 @@ addChildren <- function(node, avps) {
 
 #' @export
 composeUserRequest <- function(userid) {
+
+  if (!requireNamespace("xml2", quietly = TRUE)) {
+    stop("`xml2` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # compose the basic request XML nodes
   xml_doc <- xml2::as_xml_document(addressr:::request_template)
   xml2::xml_attr(xml_doc, "USERID") <- userid
@@ -246,6 +300,16 @@ composeUserRequest <- function(userid) {
 #' @export
 #' @import data.table
 composeAddressRequest <- function(address) {
+
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("`data.table` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
+  if (!requireNamespace("xml2", quietly = TRUE)) {
+    stop("`xml2` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
 
   # identify the tag columns that are present
   addr_cn  <- names(address)
@@ -277,11 +341,16 @@ composeAddressRequest <- function(address) {
 #' @import data.table
 composeRequest <- function(userid, address) {
 
+  if (!requireNamespace("data.table", quietly = TRUE)) {
+    stop("`data.table` needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+
   # we can only batch five addresses at a time
   n_reqs  <- ceiling(nrow(address) / 5)
 
   # every five observations constitutes a new group
-  address$groups <- head(rep(1L:n_reqs, each = 5L), nrow(address))
+  address[['groups']] <- head(rep(1L:n_reqs, each = 5L), nrow(address))
 
   # compose a request for each of the groups
   urls_dt <- address[, .(url = addressr::composeAddressRequest(.SD)), by = groups]

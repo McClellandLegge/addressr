@@ -1,4 +1,4 @@
-library(testthat)
-library(addressr)
+library("testthat")
+library("addressr")
 
-test_check("addressr")
+# test_check("addressr")
