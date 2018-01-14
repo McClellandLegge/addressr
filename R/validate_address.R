@@ -17,11 +17,11 @@
 #' @seealso \code{\link{validateAddress}}
 #' @examples
 #' \dontrun{
-#' library("data.table")
-#' library("addressr")
-#' address_fl <- system.file("extdata", "wedding-addresses.csv", package = "addressr")
-#' addresses  <- fread(address_fl)
-#' cleanAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
+# library("data.table")
+# library("addressr")
+# address_fl <- system.file("extdata", "wedding-addresses.csv", package = "addressr")
+# addresses  <- fread(address_fl)
+# cleanAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
 #' }
 #' @export
 cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 10L) {
@@ -55,6 +55,11 @@ cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 1
   } else {
     writeLines("No 'id' column supplied, creating one...")
     data_dt[['id']] <- seq(nrow(data_dt))
+  }
+
+  # escape pound sign
+  if (any(grepl("#", data_dt[[address_column]]))) {
+    warning("Pound signs '#' in the addresses usually aren't recognized by the Google geocoder -- better to replace them with 'Apt' or 'Unit'", call. = FALSE)
   }
 
   # handling for possible spurious OVER_QUERY_LIMIT errors, retry
@@ -107,8 +112,16 @@ cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 1
   geocoded_dt[, (sel) := lapply(.SD, as.character), .SDcols = sel]
 
   # collapse the street number and route to street address
+  # check for any non-existant columns (such as subpremise, which gets mapped to Address1)
   geocoded_dt[, street := paste(street_number, route)]
-  setnames(geocoded_dt, addressr:::geocode_cols, addressr:::available_tags)
+  sel <- addressr:::geocode_cols %in% names(geocoded_dt)
+  setnames(geocoded_dt, addressr:::geocode_cols[sel], addressr:::available_tags[sel])
+
+  # initialize any of the missing columns
+  need_init <- addressr:::available_tags[!sel]
+  for(col in need_init) {
+    data.table::set(geocoded_dt, i = NULL, j = col, value = NA)
+  }
 
   # create an index
   geocoded_dt[['id']] <- data_dt[['id']]
@@ -129,7 +142,7 @@ cleanAddress <- function(userid, data, address_column = 'Address', max_tries = 1
   # merge in the original data
   final <- merge(valid_geo_dt, data_dt, by = "id", all = TRUE, suffixes = c("_orig", ""))
 
-  return(valid_geo_dt)
+  return(final)
 }
 
 #' Validate a parsed address according to USPS standards
@@ -169,7 +182,7 @@ validateAddress <- function(userid, address) {
   }
 
   atags <- addressr:::available_tags
-  if (!any(atags %in% names(address))) {
+  if (any(!atags %in% names(address))) {
     msg <- paste("Must have columns:", paste0(atags, collapse = ", "))
     stop(msg)
   }
@@ -299,7 +312,7 @@ composeUserRequest <- function(userid) {
 
 #' @export
 #' @import data.table
-composeAddressRequest <- function(address) {
+composeAddressRequest <- function(userid, address) {
 
   if (!requireNamespace("data.table", quietly = TRUE)) {
     stop("`data.table` needed for this function to work. Please install it.",
@@ -347,13 +360,13 @@ composeRequest <- function(userid, address) {
   }
 
   # we can only batch five addresses at a time
-  n_reqs  <- ceiling(nrow(address) / 5)
+  n_reqs  <- ceiling(nrow(address) / 5L)
 
   # every five observations constitutes a new group
   address[['groups']] <- head(rep(1L:n_reqs, each = 5L), nrow(address))
 
   # compose a request for each of the groups
-  urls_dt <- address[, .(url = addressr::composeAddressRequest(.SD)), by = groups]
+  urls_dt <- address[, .(url = addressr::composeAddressRequest(userid, .SD)), by = groups]
 
   # return the column as a character vector
   return(urls_dt[["url"]])

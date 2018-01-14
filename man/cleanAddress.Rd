@@ -31,11 +31,6 @@ The \code{\link[ggmap]{geocode}} function seems to throw spurious `OVER_QUERY_LI
 }
 \examples{
 \dontrun{
-library("data.table")
-library("addressr")
-address_fl <- system.file("extdata", "wedding-addresses.csv", package = "addressr")
-addresses  <- fread(address_fl)
-cleanAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
 }
 }
 \seealso{

@@ -13,6 +13,9 @@ introduction to the [USPS web API](https://www.usps.com/business/web-tools-apis)
 A key benefit over [SmartyStreets](https://smartystreets.com/) and Experian tools
 is that USPS doesn't throttle or limit your queries!
 
+Once you have the validated addresses you can use the Microsot Word's mail-merge
+wizard to import the csv to labels.
+
 If you'd like to contribute, please see [this](./CONTRIBUTING.md) page.
 
 ## Pre-Requisites
@@ -23,8 +26,19 @@ Luckily they have automated email responses for basic access, just fill out the 
 
 ## Installation 
 
+```r
+devtools::install_github("McClellandLegge/addressr")
+```
 
 ## Usage
+
+```r
+library("data.table")
+library("addressr")
+address_fl <- system.file("extdata", "wedding-addresses.csv", package = "addressr")
+addresses  <- fread(address_fl)
+cleanAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
+```
 
 ## Acknowledgments
 
