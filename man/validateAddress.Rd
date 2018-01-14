@@ -22,5 +22,5 @@ If you do not have a `userid` you should register at \url{https://www.usps.com/b
     before trying to use this function.
 }
 \seealso{
-\code{\link{cleanAddress}}
+\code{\link{prepareAddress}}
 }

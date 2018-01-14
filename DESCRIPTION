@@ -1,7 +1,7 @@
 Package: addressr
 Type: Package
 Title: Verify Raw, Unstructured Addresses
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("McClelland", "Legge", , "McClelland.Legge@gmail.com", c("aut", "cre"))
 Maintainer: McClelland Legge <McClelland.Legge@gmail.com>
 Description: A package to handle poorly formed address inputs (presumably from
