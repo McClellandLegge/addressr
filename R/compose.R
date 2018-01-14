@@ -11,7 +11,7 @@ composeRequest <- function(userid, address) {
   n_reqs  <- ceiling(nrow(address) / 5L)
 
   # every five observations constitutes a new group
-  address[['groups']] <- head(rep(1L:n_reqs, each = 5L), nrow(address))
+  address[['groups']] <- utils::head(rep(1L:n_reqs, each = 5L), nrow(address))
 
   # compose a request for each of the groups
   urls_dt <- address[, .(url = composeAddressRequest(userid, .SD)), by = groups]
