@@ -64,13 +64,12 @@ validateAddress <- function(userid, address) {
   root_req  <- paste0(addressr:::root_url, req_url)
   req       <- sapply(root_req, utils::URLencode, USE.NAMES = FALSE)
 
-  # request and retrieve the URI, read the xml and convert to list
-  resp_list <- RCurl::getURIAsynchronous(req)
-  resp_xml  <- lapply(resp_list, xml2::read_xml)
-  resp      <- do.call(c, lapply(resp_xml, xml2::as_list))
+  # make the request, convert the elements to xml2 documents and combine to
+  # an R list object
+  resp      <- executeCall(req)
 
-  # extract each address to a datatable and stack
-  resp_dt   <- addressr::extractResponseItems(resp)
+  # extract each address to a datatable and stack and handle errors
+  resp_dt   <- extractResponseItems(resp)
 
   # re-arrange the columns for aesthetic purposes
   resp_cn   <- names(resp_dt)

@@ -37,7 +37,7 @@ library("data.table")
 library("addressr")
 address_fl <- system.file("extdata", "wedding-addresses.csv", package = "addressr")
 addresses  <- fread(address_fl)
-cleanAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
+prepareAddress("XXXXXX", addresses, address_column = 'Address', max_tries = 3L)
 ```
 
 ## Acknowledgments

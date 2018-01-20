@@ -1,4 +1,3 @@
-#' @export
 extractResponseItems <- function(response) {
 
   if (!requireNamespace("data.table", quietly = TRUE)) {
