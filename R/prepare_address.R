@@ -47,6 +47,10 @@ prepareAddress <- function(userid, data, address_column = 'Address', max_tries =
     stop(paste("Couldn't find expected address column:", address_column))
   }
 
+  if (!inherits(data_dt[[address_column]], 'character')) {
+    stop("The 'address_column' must be character")
+  }
+
   # make an id column to keep track of the sites across the asynchronous requests
   if ("id" %in% names(data_dt)) {
     if (any(duplicated(data_dt[['id']]))) {
