@@ -85,19 +85,19 @@ prepareAddress <- function(userid, data, address_column = 'Address', max_tries =
 
     data.table::setDT(try_res)
 
+    # assign the ID here so it perpetuates even if the order gets jumbled in
+    # the retries
+    try_res[, id := try_addrs[['id']]]
+
     # identify the bad requests
-    addrs <- try_res[['address']]
+    bad_ids <- try_res[is.na(lon) | is.na(lat)][['id']]
 
-    if (is.null(addrs)) {
-      next
-    } else {
-      ids <- try_addrs[['id']][is.na(addrs)]
-    }
+    # save the successful geocodes
+    good_addrs[[tries]] <- try_res[!id %in% bad_ids]
 
-    good_addrs[[tries]] <- try_res[!is.na(address)]
-
-    if (length(ids) > 0L) {
-      try_addrs           <- data_dt[id %in% ids]
+    # if any bad ids, use their original records to try again
+    if (length(bad_ids) > 0L) {
+      try_addrs           <- data_dt[id %in% bad_ids]
       tries               <- tries + 1L
     } else {
       break
@@ -111,7 +111,7 @@ prepareAddress <- function(userid, data, address_column = 'Address', max_tries =
   }
 
   # convert to a data.table and convert the factored columns to character
-  geocoded_dt <- data.table::rbindlist(good_addrs)
+  geocoded_dt <- data.table::rbindlist(good_addrs, fill = TRUE)
   sel         <- names(which(sapply(geocoded_dt, is.factor), useNames = TRUE))
   geocoded_dt[, (sel) := lapply(.SD, as.character), .SDcols = sel]
 
@@ -126,9 +126,6 @@ prepareAddress <- function(userid, data, address_column = 'Address', max_tries =
   for(col in need_init) {
     data.table::set(geocoded_dt, i = NULL, j = col, value = NA)
   }
-
-  # create an index
-  geocoded_dt[['id']] <- data_dt[['id']]
 
   # validate the address with USPS api
   writeLines("Validating with USPS...")
