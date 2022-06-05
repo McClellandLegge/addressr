@@ -5,6 +5,9 @@ extractResponseItems <- function(response) {
          call. = FALSE)
   }
 
+  # flatten from list of batches of 5 to list of responses
+  response <- unlist(response, recursive = FALSE)
+
   # convert each item to a data table retaining the ID attribute
   dt_list <- lapply(response, function(resp_item) {
     # extract the id attribute for rejoining with the indexed set

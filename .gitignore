@@ -36,3 +36,5 @@ vignettes/*.pdf
 # Scratch or Local files
 /*.R
 data-local/
+.Rdata
+.DS_Store
